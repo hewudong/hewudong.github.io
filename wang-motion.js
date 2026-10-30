@@ -119,7 +119,22 @@
       panel.setAttribute('aria-label', `展开${project.title || `作品${index + 1}`}`);
       const media = el('div', `gallery-media gallery-media-${index % 4}`);
       media.append(el('span', 'gallery-mark', String(index + 1).padStart(2, '0')));
-      addImage(media, project.image, project.title || '作品图片');
+      const photoSet = Array.isArray(project.images) ? project.images.filter(localImage) : [];
+      if (photoSet.length >= 2) {
+        const grid = el('div', 'gallery-photo-grid');
+        photoSet.forEach((path) => {
+          const image = el('img');
+          image.src = path;
+          image.alt = project.title || '作品图片';
+          image.draggable = false;
+          image.loading = 'lazy';
+          image.onerror = () => image.remove();
+          grid.append(image);
+        });
+        media.append(grid);
+      } else {
+        addImage(media, project.image, project.title || '作品图片');
+      }
       const copy = el('div', 'gallery-copy');
       copy.append(el('small', '', project.category || '真实作品'), el('h3', '', project.title || '作品名称待补充'), el('p', '', project.description || '作品介绍待补充'));
       if (typeof project.link === 'string' && /^https?:\/\//i.test(project.link)) {

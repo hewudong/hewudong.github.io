@@ -66,6 +66,25 @@
 /* 参考网站配色：纸白、墨蓝、鼠尾草绿、杏桃色。色值取自原站 src/styles.css。 */
 :root{--ink:#1a1e2d;--ink-soft:#747771;--mint:#d6e1c8;--paper:#f4f4f2;--white:#fbfbf6;--coral:#eca36f;--line:#d2d5c9}
 body{background:var(--paper)}
+
+/* 「认识我」卡：三张肖像 3D 轮换（contain 全图、不裁剪不挡脸），底衬纸白渐变与柔和投影。 */
+.orbit-media-1{background:linear-gradient(165deg,var(--mint) 0%,var(--paper) 78%)}
+.orbit-media-1::before{font-size:56px;opacity:.35}
+.orbit-portrait-stack{position:absolute;inset:12px 12px 6px;z-index:1;transform-style:preserve-3d;perspective:640px}
+.orbit-portrait-stack img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;opacity:0;transform:translateZ(-40px) rotateY(80deg) scale(.9);transition:transform .8s cubic-bezier(.22,.75,.25,1),opacity .5s ease,filter .8s ease;filter:drop-shadow(0 16px 20px #1a1e2d22)}
+.orbit-portrait-stack img.is-front{opacity:1;transform:translateZ(24px) rotateY(0deg) scale(1);z-index:2;filter:drop-shadow(0 20px 26px #1a1e2d33)}
+
+/* 鼠标跟随光点（仅精确指针设备；元素极小、pointer-events:none，不遮挡内容）。 */
+.cursor-dot,.cursor-ring{position:fixed;left:0;top:0;pointer-events:none;z-index:9999;border-radius:50%;will-change:transform}
+.cursor-dot{width:7px;height:7px;margin:-3.5px 0 0 -3.5px;background:var(--coral);box-shadow:0 0 0 2px #f4f4f266}
+.cursor-ring{width:34px;height:34px;margin:-17px 0 0 -17px;border:1.5px solid #1a1e2d38;transition:width .25s ease,height .25s ease,margin .25s ease,border-color .25s ease}
+.cursor-ring.is-link{width:52px;height:52px;margin:-26px 0 0 -26px;border-color:#eca36fb0}
+@media(pointer:coarse){.cursor-dot,.cursor-ring{display:none}}
+
+/* 首屏立体视差：卡环随鼠标轻微倾斜（幅度≤6°，不晃动、不遮挡文字）。 */
+.hero-stage{--tilt-x:0;--tilt-y:0}
+.orbit-ring{transform:rotateX(calc(var(--tilt-y)*1deg)) rotateY(calc(var(--tilt-x)*1deg))}
+@media(max-width:800px){.orbit-ring{transform:none}}
 .site-header{background:var(--paper);border-color:var(--line)}
 .site-header nav{border:1px solid #ffffffb8;border-radius:999px;padding:8px 13px;background:linear-gradient(135deg,#ffffffa8,#e6e9e161);box-shadow:0 10px 30px #1a1e2d12;backdrop-filter:blur(18px)}
 .site-header nav a{padding:7px 9px;border-radius:999px}.site-header nav a:hover{background:var(--mint);color:var(--ink)}

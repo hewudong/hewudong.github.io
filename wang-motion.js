@@ -31,11 +31,26 @@
     ];
     stage.replaceChildren();
     const ring = el('div', 'orbit-ring');
+    const portraitSet = Array.isArray(data.portraits) ? data.portraits.filter(localImage) : [];
     const cards = entries.map((item, index) => {
       const card = el('div', 'orbit-card');
       card.dataset.index = index;
       const media = el('div', `orbit-media orbit-media-${index + 1}`);
-      addImage(media, item.image, item.title);
+      if (index === 0 && portraitSet.length >= 2) {
+        const stack = el('div', 'orbit-portrait-stack');
+        portraitSet.forEach((path, pi) => {
+          const image = el('img');
+          image.src = path;
+          image.alt = pi === 0 ? item.title : `${item.title} ${pi + 1}`;
+          image.draggable = false;
+          image.onerror = () => image.remove();
+          if (pi === 0) image.className = 'is-front';
+          stack.append(image);
+        });
+        media.append(stack);
+      } else {
+        addImage(media, item.image, item.title);
+      }
       card.append(media, el('span', 'orbit-kicker', item.label), el('strong', 'orbit-title', item.title), el('span', 'orbit-detail', item.detail));
       ring.append(card);
       return card;
@@ -79,6 +94,17 @@
       pointerX = null;
     });
     if (!reduced) window.setInterval(() => { if (!paused && !document.hidden) move(1); }, 4800);
+    // 「认识我」卡内三张肖像 3D 翻转轮换，与环形轮转错开节奏。
+    const stackImgs = ring.querySelectorAll('.orbit-portrait-stack img');
+    if (stackImgs.length >= 2 && !reduced) {
+      let pi = 0;
+      window.setInterval(() => {
+        if (paused || document.hidden) return;
+        stackImgs[pi].classList.remove('is-front');
+        pi = (pi + 1) % stackImgs.length;
+        stackImgs[pi].classList.add('is-front');
+      }, 2800);
+    }
     paint();
   }
 

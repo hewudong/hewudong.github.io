@@ -97,4 +97,45 @@
     contactLink.addEventListener('click', (event) => event.preventDefault());
   }
   document.title = `${name}｜个人网站`;
+
+  // 鼠标跟随光点 + 首屏立体视差（桌面精确指针且未开启"减少动态效果"时启用）。
+  const finePointer = window.matchMedia('(pointer:fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (finePointer) {
+    const dot = document.createElement('div');
+    dot.className = 'cursor-dot';
+    const halo = document.createElement('div');
+    halo.className = 'cursor-ring';
+    document.body.append(dot, halo);
+    let mx = innerWidth / 2, my = innerHeight / 2, hx = mx, hy = my;
+    addEventListener('mousemove', (event) => {
+      mx = event.clientX; my = event.clientY;
+      dot.style.transform = `translate(${mx}px, ${my}px)`;
+    }, { passive: true });
+    const follow = () => {
+      hx += (mx - hx) * 0.16; hy += (my - hy) * 0.16;
+      halo.style.transform = `translate(${hx}px, ${hy}px)`;
+      requestAnimationFrame(follow);
+    };
+    requestAnimationFrame(follow);
+    addEventListener('mouseover', (event) => {
+      halo.classList.toggle('is-link', !!(event.target.closest && event.target.closest('a, button, .orbit-card, .gallery-panel, .stack-card')));
+    }, { passive: true });
+
+    const stage = document.querySelector('.hero-stage');
+    if (stage) {
+      let tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
+      const tick = () => {
+        cx += (tx - cx) * 0.08; cy += (ty - cy) * 0.08;
+        stage.style.setProperty('--tilt-x', cx.toFixed(2));
+        stage.style.setProperty('--tilt-y', cy.toFixed(2));
+        if (Math.abs(tx - cx) > 0.01 || Math.abs(ty - cy) > 0.01) { raf = requestAnimationFrame(tick); } else { raf = null; }
+      };
+      addEventListener('mousemove', (event) => {
+        const rect = stage.getBoundingClientRect();
+        tx = ((event.clientX - rect.left) / rect.width - 0.5) * 6;
+        ty = -((event.clientY - rect.top) / rect.height - 0.5) * 4;
+        if (!raf) raf = requestAnimationFrame(tick);
+      }, { passive: true });
+    }
+  }
 })();
